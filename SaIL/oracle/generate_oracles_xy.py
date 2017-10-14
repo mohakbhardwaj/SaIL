@@ -21,18 +21,24 @@ from planning_python.heuristic_functions.heuristic_function import EuclideanHeur
 from planning_python.data_structures.planning_problem import PlanningProblem
 from planning_python.planners.value_iteration import ValueIteration
 
+#Set some environment parameters
 x_lims = [0, 200]
 y_lims = [0, 200]
+start = (0, 0)
+goal = (199, 199)
+visualize=False
 
 env_params = {'x_lims': x_lims, 'y_lims': y_lims}
-lattice_params = {'x_lims': x_lims, 'y_lims': y_lims, 'resolution': [1, 1], 'origin': (0, 0), 'rotation': 0, 'connectivity': 'eight_connected', 'path_resolution': 1}
+lattice_params = {'x_lims': x_lims, 'y_lims': y_lims, 'resolution': [1, 1], 'origin': start, 'rotation': 0, 'connectivity': 'eight_connected', 'path_resolution': 1}
 cost_fn = UnitCost() #We want to calculate number of expansions only
 heuristic_fn = EuclideanHeuristicNoAng()
 lattice = XYAnalyticLattice(lattice_params)
+lattice.precalc_costs(cost_fn) #Precalculate costs for speedups
+
 planner = ValueIteration()
-start_n = lattice.state_to_node((0,0))
-goal_n = lattice.state_to_node((200, 200))
-prob_params = {'heuristic_weight': 0.0} #We want to run Djikstra
+start_n = lattice.state_to_node(start)
+goal_n = lattice.state_to_node(goal)
+prob_params = {'heuristic_weight': 0.0} #doesn't matter as VI will ignore them
 prob = PlanningProblem(prob_params)
 
 def generate_oracles(database_folders=[], num_envs=1, file_start_num=0):

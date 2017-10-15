@@ -12,3 +12,10 @@ The datasets used for this work can be found at [mohakbhardwaj/motion_planning_d
 
 The search based planning pipeline used can be found at [mohakbhardwaj/planning_python](https://github.com/mohakbhardwaj/motion_planning_datasets)
 
+# Setting Up
+Create 
+See ``examples/`` folder for basic examples of using the environments. Basic usage should look like the following:
+..code:: python
+		
+
+

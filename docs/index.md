@@ -1,6 +1,6 @@
 ## Learning Heuristic Search via Imitation
 
-CoRL 2017 paper: [PDF](pdfs/bhardwaj17.pdf)
+CoRL 2017 paper: [PDF](pdfs/bhardwaj17a.pdf)
 
 Supplementary Material: [PDF](pdfs/supplementary.pdf) 
 

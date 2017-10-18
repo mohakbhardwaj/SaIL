@@ -3,7 +3,8 @@
 Created on: March 25, 2017
 Author: Mohak Bhardwaj"""
 
-
+from collections import defaultdict
+from planning_python.heuristic_functions.heuristic_function import EuclideanHeuristicNoAng, ManhattanHeuristicNoAng, DubinsHeuristic
 import numpy as np
 import random
 
@@ -17,7 +18,8 @@ class SupervisedRegressionNetwork():
                training_epochs = 15       ,\
                summary_file = "learner_1" ,\
                mode = "cpu"               ,\
-               seed_val = 1234):
+               seed_val = 1234            ,\
+               graph_type = "XY"):
     
     
     self.output_size = output_size
@@ -49,6 +51,32 @@ class SupervisedRegressionNetwork():
     # config.allow_soft_placement=True
     # config.gpu_options.allow_growth = True  
     self.sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))#, log_device_placement=True))
+    
+    #Heuristic Functions that will be helpful in calculating features
+    self.hs = [EuclideanHeuristicNoAng(), ManhattanHeuristicNoAng()]
+
+    #Some values that will help with normalization of features
+    if self.graph_type == "XY":
+      self.dist_norm = (lattice_params['x_lims'][1]-lattice_params['x_lims'][0])*(lattice_params['y_lims'][1]-lattice_params['y_lims'][0])#Max possible distance between two nodes
+      self.max_children = self.lattice.children.shape[0]
+      self.coord_norm = np.array([self.lattice.num_cells[0], self.lattice.num_cells[1]], dtype=np.float)
+
+    elif self.graph_type == "XYH": 
+      self.dist_norm = None #Max possible dubin's distance between two nodes
+      self.max_children = len(self.lattice.children[0])
+      self.coord_norm = np.array([self.lattice.num_cells[0], self.lattice.num_cells[1], self.lattice.num_headings], dtype=np.float)
+      self.hs.append(DubinsHeuristic(lattice_params['radius']))
+    self.norm_start_n = np.array(self.start_n,dtype=np.float)/self.coord_norm
+    self.norm_goal_n = np.array(self.goal_n,dtype=np.float)/self.coord_norm
+    
+    #Dictionaries that keep track of important values for feature calculation
+    self.cost_so_far = defaultdict(lambda: np.inf)  #For each node, this is the cost of the shortest path to the start
+    self.num_invalid_predecessors = defaultdict(lambda: -1)   #For each node, this is the number of invalid predecessor edges (including siblings of parent)
+    self.num_invalid_children =  defaultdict(lambda: -1)       #For each node, this is the number of invalid children edges
+    self.num_invalid_siblings = defaultdict(lambda: -1)       #For each node, this is the number of invalid siblings edges (from best parent so far)
+    self.num_invalid_grand_children = defaultdict(lambda: -1) #For each node, this is the number of invalid grandchildren edges (seen so far)
+    self.depth_so_far = defaultdict(lambda: -1) #For each node, this is the depth of the node along the tree(along shortest path)
+
     with tf.device(self.device):
       self.graph_ops = self.init_graph()
       self.init_op = tf.global_variables_initializer()
@@ -61,15 +89,16 @@ class SupervisedRegressionNetwork():
       # print('Here2')  
       # self.train_writer = tf.summary.FileWriter(self.summary_dir_train, self.sess.graph)
       # print('Her3')
+
     self.sess.run(self.init_op)
     print('network created and initialized')
 
   def create_network(self):
     """Constructs and initializes core network architecture"""  
     state_input = tf.placeholder(tf.float32, [None] + self.input_shape)
+    net = tf.py_func(self.get_feature_vec, state_input, tf.float32, stateful=True, name="feature_calc")
     net = tflearn.fully_connected(state_input, 100, activation='relu')
     net = tflearn.fully_connected(net, 50, activation ='relu')
-    # net = tflearn.fully_connected(net, 25, activation='relu')
     output = tflearn.fully_connected(net, self.output_size, activation = 'linear')
     return state_input, output
 
@@ -92,6 +121,17 @@ class SupervisedRegressionNetwork():
                         "network_params": network_params,\
                         "saver": saver}
     return graph_operations
+  
+  def get_feature_vec(self, node):
+    """Given a node, calculate the features for that node"""
+    feature_vec = [self.norm_start_n, self.norm_goal_n]
+    feature_vec.append(node,/self.coord_norm)    
+    for h in self.heuristic_functions: feature_vec.append(h(node, self.goal_n)/self.dist_norm) #Normalize the distances
+    feature_vec.append(self.num_invalid_predecessors[node]/self.depth_so_far[node]*self.max_children) #Normalized invalid predecessors
+    feature_vec.append(self.num_invalid_siblings/self.max_children)
+    feature_vec.append(self.num_invalid_children/self.max_children)
+    feature_vec.append(self.num_invalid_grand_children/2*self.max_children)
+    return feature_vec
 
   def train(self, database):
     #Shuffle the database
@@ -115,7 +155,10 @@ class SupervisedRegressionNetwork():
     print('optimization finished!')
 
 
-  
+  def get_best_node(self, obs):
+    """takes as input an open list and returns the best node to be expanded"""
+    return None
+    
   def get_q_value(self, obs):
     obs = obs.reshape(self.input_shape)
     output = self.graph_ops['output'].eval(session=self.sess, feed_dict={self.graph_ops['s']:[obs]})

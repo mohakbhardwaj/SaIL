@@ -7,6 +7,7 @@ Author: Mohak Bhardwaj
 from collections import defaultdict
 import numpy as np
 import os
+from SaIL.learners.supervised_regression_network import SupervisedRegressionNetwork
 from planning_python.data_structures.priority_queue import PriorityQueue
 from planning_python.planners.search_based_planner import SearchBasedPlanner
 from planning_python.environment_interface.env_2d import Env2D
@@ -18,7 +19,7 @@ from planning_python.data_structures.planning_problem import PlanningProblem
 
 
 class StateLatticePlannerEnv(SearchBasedPlanner):
-  def __init__(self, env_params, lattice_type, lattice_params, cost_fn):
+  def __init__(self, env_params, lattice_type, lattice_params, cost_fn, learner_params):
     
     self.env_params = env_params
     self.cost_fn = cost_fn
@@ -46,22 +47,7 @@ class StateLatticePlannerEnv(SearchBasedPlanner):
     self.cost_so_far = defaultdict(lambda: np.inf) #Keep track of cost of path to the node
     self.came_from = {} #Keep track of parent during search
 
-    #Heuristic Functions that will be helpful in calculating features
-    self.hs = [EuclideanHeuristicNoAng(), ManhattanHeuristicNoAng()]
-
-    #Some values that will help with normalization of features
-    if self.lattice_type == "XY":
-      self.dist_norm = (lattice_params['x_lims'][1]-lattice_params['x_lims'][0])*(lattice_params['y_lims'][1]-lattice_params['y_lims'][0])#Max possible distance between two nodes
-      self.max_children = self.lattice.children.shape[0]
-      self.coord_norm = np.array([self.lattice.num_cells[0], self.lattice.num_cells[1]], dtype=np.float)
-
-    elif self.lattice_type == "XYH": 
-      self.dist_norm = None #Max possible dubin's distance between two nodes
-      self.max_children = len(self.lattice.children[0])
-      self.coord_norm = np.array([self.lattice.num_cells[0], self.lattice.num_cells[1], self.lattice.num_headings], dtype=np.float)
-      self.hs.append(DubinsHeuristic(lattice_params['radius']))
-    self.norm_start_n = np.array(self.start_n,dtype=np.float)/self.coord_norm
-    self.norm_goal_n = np.array(self.goal_n,dtype=np.float)/self.coord_norm
+    self.learner = SupervisedRegressionNetwork(learner_params) #learner is a part of the environment
 
   def initialize(self, env_folder, oracle_folder, num_envs, file_start_num, phase='train', visualize=False):
     """Initialize everything"""
@@ -73,9 +59,6 @@ class StateLatticePlannerEnv(SearchBasedPlanner):
     self.curr_env_num = file_start_num - 1
 
       
-  def set_learner_policy(self, l):
-    self.learner_policy = l 
-
   def set_mixing_param(self, beta):
     self.beta = beta
   
@@ -87,11 +70,7 @@ class StateLatticePlannerEnv(SearchBasedPlanner):
     
     self.came_from[self.start_n]= (None, None)
     self.cost_so_far[self.start_n] = 0.  #For each node, this is the cost of the shortest path to the start
-    self.num_invalid_predecessors = defaultdict(lambda: -1)   #For each node, this is the number of invalid predecessor edges (including siblings of parent)
-    self.num_invalid_children =  defaultdict(lambda: -1)       #For each node, this is the number of invalid children edges
-    self.num_invalid_siblings = defaultdict(lambda: -1)       #For each node, this is the number of invalid siblings edges (from best parent so far)
-    self.num_invalid_grand_children = defaultdict(lambda: -1) #For each node, this is the number of invalid grandchildren edges (seen so far)
-    self.depth_so_far = defaultdict(lambda: -1) #For each node, this is the depth of the node along the tree(along shortest path)
+
     
     self.num_invalid_predecessors[start] = 0
     self.num_invalid_siblings[start] = 0
@@ -174,10 +153,12 @@ class StateLatticePlannerEnv(SearchBasedPlanner):
           if new_g < self.cost_so_far[neighbor]:
             self.came_from[neighbor] = (curr_node, valid_edges[i])
             self.cost_so_far[neighbor] = new_g
+
             #Update feature dicts
-            self.num_invalid_predecessors[neighbor] = self.num_invalid_predecessors[curr_node] + n_invalid_edges
-            self.num_invalid_siblings[neighbor] = n_invalid_edges
-            self.depth_so_far[neighbor] = self.depth_so_far[curr_node] + 1
+            self.learner.cost_so_far[neighbor] = new_g
+            self.learner.num_invalid_predecessors[neighbor] = self.num_invalid_predecessors[curr_node] + n_invalid_edges
+            self.learner.num_invalid_siblings[neighbor] = n_invalid_edges
+            self.learner.depth_so_far[neighbor] = self.depth_so_far[curr_node] + 1
       #Step 6:increment number of expansions
       curr_expansions += 1
 
@@ -187,18 +168,6 @@ class StateLatticePlannerEnv(SearchBasedPlanner):
       print ('Found no solution, priority queue empty')
     time_taken = time.time()- start_t
     return path, path_cost, curr_expansions, time_taken, self.came_from, self.cost_so_far, self.c_obs    #Run planner on current env and return data seetn. Also, update current env to next env
-
-  def get_feature_vec(self, node):
-    """Given a node, calculate the features for that node"""
-    feature_vec = [self.norm_start_n, self.norm_goal_n]
-    feature_vec.append(node,/self.coord_norm)    
-    for h in self.heuristic_functions: feature_vec.append(h(node, self.goal_n)/self.dist_norm) #Normalize the distances
-    feature_vec.append(self.num_invalid_predecessors[node]/self.depth_so_far[node]*self.max_children) #Normalized invalid predecessors
-    feature_vec.append(self.num_invalid_siblings/self.max_children)
-    feature_vec.append(self.num_invalid_children/self.max_children)
-    feature_vec.append(self.num_invalid_grand_children/2*self.max_children)
-    return feature_vec
-
 
   def get_heuristic(self, node, goal):
     """Given a node and goal, calculate features and get heuristic value"""    

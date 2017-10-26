@@ -1,0 +1,2 @@
+model_checkpoint_path: "/home/mohak/workspace/heuristic_learning_ws/SaIL/SaIL/learners/trained_models/single_bugtrap/XY_2"
+all_model_checkpoint_paths: "/home/mohak/workspace/heuristic_learning_ws/SaIL/SaIL/learners/trained_models/single_bugtrap/XY_2"

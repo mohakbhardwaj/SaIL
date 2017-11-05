@@ -1,15 +1,4 @@
-#!/usr/bin/env python
 
-"""An agent that implements the SaIL algorithm as described in the CoRL,2017 paper, Learning Heuristic Search via Imitation. 
-The agent takes as arguments an environment database, and parameters as described in the paper and runs the SaIL algorithm for a
-particular number of iterations and returns the results. 
-
-The classic SaIL agent uses a state lattice based planner as the search function. It can be replaced by RGGs or any other 
-graph plan algorithm
-
-Author: Mohak Bhardwaj
-Date: 16 October, 2017
-"""
 from __future__ import division
 import numpy as np
 import os
@@ -73,10 +62,9 @@ class SaILAgent():
       # curr_beta = (self.beta0)**i #curr_beta = 1 for 0th iteration (expert only), then decayed exponentially based on beta0
       curr_beta = 0
       iter_expansions = 0
+    
 
       for j in range(self.m):
-        if j == 131:
-          continue
         curr_env_file = os.path.join(os.path.abspath(train_folder), str(file_start_num_train + j)+'.png')
         curr_oracle_file = os.path.join(os.path.abspath(train_oracle_folder), "oracle_" + str(file_start_num_train + j)+'.' + oracle_file_type)
         print(curr_oracle_file)

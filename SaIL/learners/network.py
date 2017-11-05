@@ -9,11 +9,9 @@ sys.path.insert(0, os.path.abspath('../..'))
 import numpy as np
 import random
 
-# tf.logging.set_verbosity(tf.logging.INFO)
 
 class SupervisedRegressionNetwork():
-  def __init__(self, params):
-    
+  def __init__(self, params):    
     self.initialized=False
     self.output_size = params['output_size']
     self.input_size = params['input_size']

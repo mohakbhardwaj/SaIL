@@ -1,24 +1,11 @@
-#!/usr/bin/env python
-"""Given as input a list of database folders , we calculate the clairvoyant oracle i.e number of expansions to the goal for each node.
-The oracle is then stored in a json file 
-
-Author: Mohak Bhardwaj
-Date: October 6, 2017
-"""
+import sys
+sys.path.insert(0, "../../../planning_python")
 import argparse
 from collections import defaultdict
 import json
 import pickle
 import matplotlib.pyplot as plt
 import numpy as np
-import os
-import sys
-sys.path.insert(0, "../../../planning_python")
-import time
-from planning_python.environment_interface.env_2d import Env2D
-from planning_python.state_lattices.common_lattice.xy_analytic_lattice import XYAnalyticLattice
-from planning_python.cost_functions.cost_function import UnitCost
-from planning_python.heuristic_functions.heuristic_function import EuclideanHeuristicNoAng, ManhattanHeuristicNoAng
 from planning_python.data_structures.planning_problem import PlanningProblem
 from planning_python.planners.value_iteration import ValueIteration
 
@@ -30,12 +17,9 @@ goal = (200, 200)
 visualize=False
 
 env_params = {'x_lims': x_lims, 'y_lims': y_lims}
-lattice_params = {'x_lims': x_lims, 'y_lims': y_lims, 'resolution': [1, 1], 'origin': start, 'rotation': 0, 'connectivity': 'eight_connected', 'path_resolution': 1}
-cost_fn = UnitCost() #We want to calculate number of expansions only
-heuristic_fn = EuclideanHeuristicNoAng()
-lattice = XYAnalyticLattice(lattice_params)
-lattice.precalc_costs(cost_fn) #Precalculate costs for speedups
+lattice_params = {}
 
+lattice.precalc_costs(cost_fn) #Precalculate costs for speedups
 planner = ValueIteration()
 start_n = lattice.state_to_node(start)
 goal_n = lattice.state_to_node(goal)
@@ -53,8 +37,6 @@ def generate_oracles(database_folders=[], num_envs=1, file_start_num=0, file_typ
   global env_params, lattice_params, cost_fn, heuristic_fn, lattice, planner, start_n, goal_n, prob
      
   e = Env2D()
-  print('Generating Oracles')
-
   for folder in database_folders:
     env_name = os.path.split(os.path.split(os.path.abspath(folder))[0])[1]
     env_folder = os.path.split(os.path.abspath(folder))[1]

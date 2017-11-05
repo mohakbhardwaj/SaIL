@@ -188,5 +188,3 @@ class TestPlanner(SaILPlanner):
     return path, path_cost, curr_expansions, plan_time, self.came_from, self.cost_so_far, self.c_obs, avg_loss
 
 
-
-    

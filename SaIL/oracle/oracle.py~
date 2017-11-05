@@ -41,4 +41,4 @@ class Oracle():
     self.cost_to_go.clear()
     self.initialized = False
     
-
+ No newline at end of file

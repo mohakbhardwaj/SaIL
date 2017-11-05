@@ -16,24 +16,25 @@ import sys
 sys.path.insert(0, "../../../planning_python")
 import time
 from planning_python.environment_interface.env_2d import Env2D
-from planning_python.state_lattices.common_lattice.xy_analytic_lattice import XYAnalyticLattice
+from planning_python.state_lattices.common_lattice.xyh_analytic_lattice import XYHAnalyticLattice
 from planning_python.cost_functions.cost_function import UnitCost
-from planning_python.heuristic_functions.heuristic_function import EuclideanHeuristicNoAng, ManhattanHeuristicNoAng
+from planning_python.heuristic_functions.heuristic_function import DubinsHeuristic
 from planning_python.data_structures.planning_problem import PlanningProblem
 from planning_python.planners.value_iteration import ValueIteration
 
 #Set some environment parameters
 x_lims = [0, 201]
 y_lims = [0, 201]
-start = (0, 0)
-goal = (200, 200)
+start = (0, 0, 0)
+goal = (150, 150, np.pi/2.)
+turning_radius=2.0
 visualize=False
 
 env_params = {'x_lims': x_lims, 'y_lims': y_lims}
-lattice_params = {'x_lims': x_lims, 'y_lims': y_lims, 'resolution': [1, 1], 'origin': start, 'rotation': 0, 'connectivity': 'eight_connected', 'path_resolution': 1}
+lattice_params = {'x_lims': x_lims, 'y_lims': y_lims, 'radius': turning_radius, 'origin': (start[0], start[1]), 'rotation': 0, 'connectivity': 'dubins_turn_90', 'path_resolution': turning_radius/2}
 cost_fn = UnitCost() #We want to calculate number of expansions only
-heuristic_fn = EuclideanHeuristicNoAng()
-lattice = XYAnalyticLattice(lattice_params)
+heuristic_fn = DubinsHeuristic(turning_radius)
+lattice = XYHAnalyticLattice(lattice_params)
 lattice.precalc_costs(cost_fn) #Precalculate costs for speedups
 
 planner = ValueIteration()
@@ -70,10 +71,10 @@ def generate_oracles(database_folders=[], num_envs=1, file_start_num=0, file_typ
       output_file = "oracle_" + str(file_start_num + i) + "." + file_type
       #Write to file
       if file_type == "pickle":
-        with open(os.path.join(os.path.abspath("./saved_oracles/xy/"+env_name+"/"+env_folder), output_file), 'wb') as fh:
+        with open(os.path.join(os.path.abspath("./saved_oracles/xyh/"+env_name+"/"+env_folder), output_file), 'wb') as fh:
           pickle.dump(cost_so_far, fh, protocol = pickle.HIGHEST_PROTOCOL)
       elif file_type == "json":
-        with open(os.path.join(os.path.abspath("./saved_oracles/xy/"+env_name+"/"+env_folder), output_file), 'w') as fh:
+        with open(os.path.join(os.path.abspath("./saved_oracles/xyh/"+env_name+"/"+env_folder), output_file), 'w') as fh:
           new_cost_so_far = get_json_dict(cost_so_far)
           json.dump(new_cost_so_far, fh, sort_keys=True)
  

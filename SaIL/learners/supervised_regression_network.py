@@ -11,9 +11,9 @@ import os
 import random
 
 
-class SupervisedRegressionNetwork():
+class SupervisedRegressionNetworkDep():
   def __init__(self, params):
-    
+    self.initialized = False
     self.output_size = params['output_size']
     self.learning_rate = params['learning_rate']
     self.batch_size =  params['batch_size']
@@ -68,21 +68,24 @@ class SupervisedRegressionNetwork():
     self.frontier = [] #Maintain frontier
     
   def initialize(self):
-    global tf
-    global tflearn
-    # import matplotlib.pyplot as plt
-    import tensorflow as tf 
-    import tflearn
-    config = tf.ConfigProto()
-    config.allow_soft_placement=True
-    config.gpu_options.allow_growth = True
-    self.sess = tf.Session(config=config)#, log_device_placement=True))
-    with tf.device(self.device):
-      self.graph_ops = self.init_graph()
-      self.init_op = tf.global_variables_initializer()
 
-    self.sess.run(self.init_op)
-    print('network created and initialized')
+    if not self.initialized:
+      global tf
+      global tflearn
+      # import matplotlib.pyplot as plt
+      import tensorflow as tf 
+      import tflearn
+      config = tf.ConfigProto()
+      config.allow_soft_placement=True
+      config.gpu_options.allow_growth = True
+      self.sess = tf.Session(config=config)#, log_device_placement=True))
+      with tf.device(self.device):
+        self.graph_ops = self.init_graph()
+        self.init_op = tf.global_variables_initializer()
+
+      self.sess.run(self.init_op)
+      self.initialized = True
+      print('network created and initialized')
 
   def create_network(self):
     """Constructs and initializes core network architecture"""

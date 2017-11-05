@@ -1,0 +1,1 @@
+{"avg_expansions_per_iter": [200.0, 200.0, 200.0], "avg_path_cost_per_iter": [Infinity, Infinity, Infinity], "avg_time_per_iter": [0.18225789070129395, 0.1801084280014038, 0.17823505401611328], "dataset_size_per_iter": [340, 706, 1048], "loss_per_iter": [18293.651562500003, 22300.510830965908, 21963.701049804688], "num_solved_per_iter": [0, 0, 0]}

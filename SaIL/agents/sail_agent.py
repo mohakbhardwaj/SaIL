@@ -1,4 +1,15 @@
 
+
+"""An agent that implements the SaIL algorithm as described in the CoRL,2017 paper, Learning Heuristic Search via Imitation. 
+The agent takes as arguments an environment database, and parameters as described in the paper and runs the SaIL algorithm for a
+particular number of iterations and returns the results. 
+
+The classic SaIL agent uses a state lattice based planner as the search function. It can be replaced by RGGs or any other 
+graph plan algorithm
+
+Author: Mohak Bhardwaj
+Date: 16 October, 2017
+"""
 from __future__ import division
 import numpy as np
 import os
@@ -154,5 +165,3 @@ class SaILAgent():
     test_results['num_solved'] = num_solved
     test_results['avg_loss'] = avg_loss
     return test_results
-
-     

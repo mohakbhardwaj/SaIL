@@ -25,8 +25,8 @@ class SaILAgent():
     self.beta0 = sail_params['beta0'] #Initial beta (after iter 0)
     self.k     = sail_params['k']     #Number of datapoitns to collect per environment
     self.N     = sail_params['N']     #number of SaIL iterations
-    self.T     = 1100 #sail_params['T']     #episode length for training
-    self.Tv    = 20000#sail_params['Tv']    #sail_params['Tv']    #episode length for validation/testing
+    self.T     = sail_params['T']     #episode length for training
+    self.Tv    = sail_params['Tv']    #sail_params['Tv']    #episode length for validation/testing
     self.m     = sail_params['m']     #Number of training envs
     self.mv    = sail_params['mv']    #Number of validation envs
     self.env_params = env_params
@@ -85,7 +85,7 @@ class SaILAgent():
         self.prob.initialize(self.e, self.lattice, self.cost_fn, self.heuristic_fn, self.start_n, self.goal_n, visualize= visualize_train) 
         self.train_planner.initialize(self.prob)
         try:
-          path, path_cost, curr_expansions, plan_time, _, _, _, dataset = self.train_planner.plan(self.oracle, curr_beta, self.k, 1100)
+          path, path_cost, curr_expansions, plan_time, _, _, _, dataset = self.train_planner.plan(self.oracle, curr_beta, self.k, self.T)
           agg_dataset += dataset #add data to meta dataset
         except ValueError:
           continue
@@ -131,7 +131,7 @@ class SaILAgent():
       self.prob.initialize(self.e, self.lattice, self.cost_fn, self.heuristic_fn, self.start_n, self.goal_n, visualize= visualize_validation)
       self.test_planner.initialize(self.prob)
       try:
-        path, path_cost, curr_expansions, plan_time, came_from, cost_so_far, c_obs, avg_episode_loss= self.test_planner.plan(self.oracle, 20000)
+        path, path_cost, curr_expansions, plan_time, came_from, cost_so_far, c_obs, avg_episode_loss= self.test_planner.plan(self.oracle, self.Tv)
         print('[Validation Environment Number: %d, results]: Path Cost %f, Number of Expansions %f, Planning Time %f'%(j, path_cost, curr_expansions, plan_time))
         if path_cost < np.inf:
           num_solved += 1

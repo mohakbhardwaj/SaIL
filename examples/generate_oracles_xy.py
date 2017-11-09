@@ -1,13 +1,19 @@
+import os
 import sys
-sys.path.insert(0, "../../../planning_python")
+sys.path.insert(0, "../../planning_python")
 import argparse
 from collections import defaultdict
 import json
 import pickle
 import matplotlib.pyplot as plt
 import numpy as np
-from planning_python.data_structures.planning_problem import PlanningProblem
-from planning_python.planners.value_iteration import ValueIteration
+from planning_python.data_structures import PlanningProblem
+from planning_python.planners import ValueIteration
+from planning_python.cost_functions import UnitCost
+from planning_python.heuristic_functions import EuclideanHeuristicNoAng
+from planning_python.state_lattices import XYAnalyticLattice
+from planning_python.environment_interface import Env2D
+
 
 #Set some environment parameters
 x_lims = [0, 201]
@@ -15,11 +21,21 @@ y_lims = [0, 201]
 start = (0, 0)
 goal = (200, 200)
 visualize=False
-
+cost_fn = UnitCost()
+heuristic_fn = EuclideanHeuristicNoAng()
 env_params = {'x_lims': x_lims, 'y_lims': y_lims}
-lattice_params = {}
 
-lattice.precalc_costs(cost_fn) #Precalculate costs for speedups
+lattice_params = dict()
+lattice_params['x_lims']          = x_lims   # Useful to calculate number of cells in lattice 
+lattice_params['y_lims']          = y_lims   # Useful to calculate number of cells in lattice
+lattice_params['resolution']      = [1, 1]   # Useful to calculate number of cells in lattice + conversion from discrete to continuous space and vice-versa
+lattice_params['origin']          = start    # Used for conversion from discrete to continuous and vice-versa. 
+lattice_params['rotation']        = 0        # Can rotate lattice with respect to world
+lattice_params['connectivity']    = 'eight_connected' #Lattice connectivity (can be four or eight connected for xylattice)
+lattice_params['path_resolution'] = 1         #Resolution for defining edges and doing collision checking (in meters)
+lattice = XYAnalyticLattice(lattice_params)
+
+# lattice.precalc_costs(cost_fn) #Precalculate costs for speedups
 planner = ValueIteration()
 start_n = lattice.state_to_node(start)
 goal_n = lattice.state_to_node(goal)
@@ -52,10 +68,10 @@ def generate_oracles(database_folders=[], num_envs=1, file_start_num=0, file_typ
       output_file = "oracle_" + str(file_start_num + i) + "." + file_type
       #Write to file
       if file_type == "pickle":
-        with open(os.path.join(os.path.abspath("./saved_oracles/xy/"+env_name+"/"+env_folder), output_file), 'wb') as fh:
+        with open(os.path.join(os.path.abspath("../SaIL/oracle/saved_oracles/xy/"+env_name+"/"+env_folder), output_file), 'wb') as fh:
           pickle.dump(cost_so_far, fh, protocol = pickle.HIGHEST_PROTOCOL)
       elif file_type == "json":
-        with open(os.path.join(os.path.abspath("./saved_oracles/xy/"+env_name+"/"+env_folder), output_file), 'w') as fh:
+        with open(os.path.join(os.path.abspath("../SaIL/oracle/saved_oracles/xy/"+env_name+"/"+env_folder), output_file), 'w') as fh:
           new_cost_so_far = get_json_dict(cost_so_far)
           json.dump(new_cost_so_far, fh, sort_keys=True)
  

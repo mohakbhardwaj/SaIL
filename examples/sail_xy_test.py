@@ -48,26 +48,24 @@ learner_params['display_step'] = 5
 
 
 sail_params = dict()
-sail_params['beta0'] = 0.7      #Initial beta (after iter 0)
-sail_params['k']     = 60      #Number of datapoitns to collect per environment
-sail_params['N']     = 15       #number of SaIL iterations
-sail_params['T']     = 1100     #max episode length for training
+sail_params['beta0'] = 0        #Initial beta (after iter 0)
+sail_params['k']     = 60       #Number of datapoitns to collect per environment
+sail_params['N']     = 5        #number of SaIL iterations
+sail_params['T']     = 2000     #max episode length for training
 sail_params['Tv']    = 20000    #episode length for validation/testing
-sail_params['m']     = 250      #Number of training envs
+sail_params['m']     = 200      #Number of training envs
 sail_params['mv']    = 70       #Number of validation envs
 
 
-def run_benchmark(test_folders, test_oracle_folders, model_files, num_envs, test_file_start_num, visualize=False, oracle_file_type="json"):
+def run_benchmark(test_folders, test_oracle_folders, model_files, result_folders, num_envs, test_file_start_num, visualize=False, oracle_file_type="json"):
   global sail_params, env_params, learner_params, lattice, cost_fn, start, goal
-  # results = defaultdict(list)
   pp = pprint.PrettyPrinter()
   for (i,folder) in enumerate(test_folders):
-    env_name = os.path.split(os.path.split(os.path.abspath(folder))[0])[1]
     agent = SaILAgent(sail_params, env_params, learner_params, lattice, cost_fn, start, goal)
     env_results = agent.run_test(folder, test_oracle_folders[i], test_file_start_num, model_files[i], visualize, oracle_file_type)
     output_file = "test_" + "iter_" + str(sail_params['N']) + "_features_" + str(learner_params['input_size']) + "_num_test_envs_" + str(sail_params['mv'])
     pp.pprint(env_results)
-    json.dump(env_results, open(os.path.join(os.path.abspath("../SaIL/results/xy/"+env_name), output_file), 'w'), sort_keys=True)
+    json.dump(env_results, open(os.path.join(os.path.abspath(result_folders[i]), output_file), 'w'), sort_keys=True)
 
 
 if __name__ == "__main__":
@@ -81,8 +79,5 @@ if __name__ == "__main__":
   parser.add_argument('--test_file_start_num', type=int)
   parser.add_argument('--visualize', action='store_true')
   parser.add_argument('--oracle_file_type', type=str)
-
   args = parser.parse_args()
-  #Run the benchmark and save results
-  results = run_benchmark(args.test_folders, args.test_oracle_folders, args.model_files, args.num_envs, args.test_file_start_num, args.visualize, args.oracle_file_type)
-  # print(results)
+  run_benchmark(args.test_folders, args.test_oracle_folders, args.model_files, args.result_folders, args.num_envs, args.test_file_start_num, args.visualize, args.oracle_file_type)

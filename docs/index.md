@@ -8,7 +8,7 @@ CoRL 2017 Poster: [PDF](pdfs/poster.pdf)
 
 CoRL 2017 Talk: [PDF](pdfs/oral_ppt.pdf) 
 
-This is a video of the invited long talk given by me at Conference on Robot Learning(CoRL), 2017 explaining the details of the approach.
+This is a video of the invited long talk given by Mohak Bhardwaj at Conference on Robot Learning(CoRL), 2017 explaining the motivation and details of the approach.
 <iframe width="854" height="480" src="https://www.youtube.com/embed/OFmWo36N98U" frameborder="0" gesture="media" allow="encrypted-media" allowfullscreen></iframe>
 
 

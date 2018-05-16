@@ -1,0 +1,1 @@
+{"avg_expansions_per_iter": [15640.0], "avg_path_cost_per_iter": [630.2497833620569], "avg_time_per_iter": [68.97504997253418], "dataset_size_per_iter": [60], "num_solved_per_iter": [1], "train_loss_per_iter": [0.0], "validation_loss_per_iter": [178.82255950856]}

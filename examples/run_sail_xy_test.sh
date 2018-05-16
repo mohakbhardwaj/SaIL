@@ -42,7 +42,5 @@ ORACLE_FILE_TYPE="json"
 
 
 
-#python generate_oracles_xy.py --database_folders ${TRAIN_FOLDER_1} ${TRAIN_FOLDER_2} ${TRAIN_FOLDER_3} ${TRAIN_FOLDER_4} ${TRAIN_FOLDER_5} ${TRAIN_FOLDER_6} ${TRAIN_FOLDER_7} ${TRAIN_FOLDER_8}  --num_env$
-# python run_sail_test.py --database_folders ${VALID_FOLDER_1} ${VALID_FOLDER_2} ${VALID_FOLDER_3} ${VALID_FOLDER_4} ${VALID_FOLDER_5} ${VALID_FOLDER_6} ${VALID_FOLDER_7} ${VALID_FOLDER_8}  --num_envs 100 --file_start_num 800
 python sail_xy_test.py --test_folders ${TEST_FOLDER_5} --test_oracle_folders ${ORACLE_FOLDER_5} --model_files ${MODEL_FILE_5} --result_folders ${RESULTS_FOLDER_5} --num_envs ${NUM_ENVS} --test_file_start_num ${TEST_FILE_START_NUM} --oracle_file_type ${ORACLE_FILE_TYPE} # --visualize 
 

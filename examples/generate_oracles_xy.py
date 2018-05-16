@@ -67,11 +67,14 @@ def generate_oracles(database_folders=[], num_envs=1, file_start_num=0, file_typ
       print('Nodes expanded = %d, Time taken = %f'%(num_expansions, plan_time))
       output_file = "oracle_" + str(file_start_num + i) + "." + file_type
       #Write to file
+      file_directory = os.path.abspath("../SaIL/oracle/saved_oracles/xy/"+env_name+"/"+env_folder)
+      if not os.path.exists(file_directory):
+        os.makedirs(file_directory)
       if file_type == "pickle":
-        with open(os.path.join(os.path.abspath("../SaIL/oracle/saved_oracles/xy/"+env_name+"/"+env_folder), output_file), 'wb') as fh:
+        with open(os.path.join(file_path, output_file), 'wb') as fh:
           pickle.dump(cost_so_far, fh, protocol = pickle.HIGHEST_PROTOCOL)
       elif file_type == "json":
-        with open(os.path.join(os.path.abspath("../SaIL/oracle/saved_oracles/xy/"+env_name+"/"+env_folder), output_file), 'w') as fh:
+        with open(os.path.join(file_directory, output_file), 'w') as fh:
           new_cost_so_far = get_json_dict(cost_so_far)
           json.dump(new_cost_so_far, fh, sort_keys=True)
  
@@ -86,4 +89,3 @@ if __name__ == "__main__":
   args = parser.parse_args()
   #generate oracles and save results
   generate_oracles(args.database_folders, args.num_envs, args.file_start_num, args.file_type)
-  # print(results)

@@ -28,8 +28,8 @@ TEST_FOLDER_8="../../motion_planning_datasets/single_bugtrap/test/"
 
 FILE_TYPE="json"
 
-python generate_oracles_xy.py --database_folders ${TRAIN_FOLDER_1} ${TRAIN_FOLDER_2} ${TRAIN_FOLDER_3} ${TRAIN_FOLDER_4} ${TRAIN_FOLDER_5} ${TRAIN_FOLDER_6} ${TRAIN_FOLDER_7} ${TRAIN_FOLDER_8}  --num_envs 250 --file_start_num 0 --file_type ${FILE_TYPE}
-python generate_oracles_xy.py --database_folders ${VALID_FOLDER_1} ${VALID_FOLDER_2} ${VALID_FOLDER_3} ${VALID_FOLDER_4} ${VALID_FOLDER_5} ${VALID_FOLDER_6} ${VALID_FOLDER_7} ${VALID_FOLDER_8}  --num_envs 100 --file_start_num 800 --file_type ${FILE_TYPE}
-# python generate_oracles_xy.py --database_folders ${TRAIN_FOLDER_4}  --num_envs 200 --file_start_num 0 --file_type ${FILE_TYPE}
-# python generate_oracles_xy.py --database_folders ${VALID_FOLDER_4}  --num_envs 100 --file_start_num 800 --file_type ${FILE_TYPE}
-# python generate_oracles_xy.py --database_folders ${TEST_FOLDER_4}  --num_envs 100 --file_start_num 900 --file_type ${FILE_TYPE}
+#python generate_oracles_xy.py --database_folders ${TRAIN_FOLDER_1} ${TRAIN_FOLDER_2} ${TRAIN_FOLDER_3} ${TRAIN_FOLDER_4} ${TRAIN_FOLDER_5} ${TRAIN_FOLDER_6} ${TRAIN_FOLDER_7} ${TRAIN_FOLDER_8}  --num_envs 250 --file_start_num 0 --file_type ${FILE_TYPE}
+#python generate_oracles_xy.py --database_folders ${VALID_FOLDER_1} ${VALID_FOLDER_2} ${VALID_FOLDER_3} ${VALID_FOLDER_4} ${VALID_FOLDER_5} ${VALID_FOLDER_6} ${VALID_FOLDER_7} ${VALID_FOLDER_8}  --num_envs 100 --file_start_num 800 --file_type ${FILE_TYPE}
+python generate_oracles_xy.py --database_folders ${TRAIN_FOLDER_1} --num_envs 2 --file_start_num 0 --file_type ${FILE_TYPE}
+python generate_oracles_xy.py --database_folders ${VALID_FOLDER_1} --num_envs 2 --file_start_num 800 --file_type ${FILE_TYPE}
+

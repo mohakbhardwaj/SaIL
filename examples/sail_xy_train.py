@@ -49,10 +49,10 @@ learner_params['mode'] = "gpu"
 learner_params['display_step'] = 1
 
 sail_params = dict()
-sail_params['beta0'] = 0         #Initial beta (after iter 0)
-sail_params['k']     = 60        #Number of datapoints to collect per environment
-sail_params['N']     = 10         #number of SaIL iterations
-sail_params['T']     = 6000      #max episode length for training
+sail_params['beta0'] = 0        #Initial beta (after iter 0)
+sail_params['k']     = 60       #Number of datapoints to collect per environment
+sail_params['N']     = 10       #number of SaIL iterations
+sail_params['T']     = 6000     #max episode length for training
 sail_params['Tv']    = 20000    #episode length for validation/testing
 sail_params['m']     = 200      #Number of training envs
 sail_params['mv']    = 70       #Number of validation envs
@@ -63,8 +63,14 @@ def run_training(train_folder, train_oracle_folder, validation_folder, validatio
   env_name = os.path.split(os.path.split(os.path.abspath(train_folder))[0])[1]
   output_file_str = "train_iter_" + str(sail_params['N']) + "_features_" + str(learner_params['input_size']) + "_num_train_envs_" + str(sail_params['m'])+ "_num_valid_envs_" + str(sail_params['mv'])
   model_folder = os.path.join(os.path.abspath(model_folder), output_file_str)
+  if not os.path.exists(results_folder):
+    os.makedirs(results_folder)
+  if not os.path.exists(model_folder):
+    os.makedirs(model_folder)
+
   if pretrained_model:
     pretrained_model = os.path.abspath(pretrained_model)
+  
   agent = SaILAgent(sail_params, env_params, learner_params, lattice, cost_fn, start, goal)
   env_results = agent.run_training(train_folder, train_oracle_folder, validation_folder, validation_oracle_folder, model_folder, file_start_num_train, file_start_num_valid, pretrained_model, visualize_train, visualize_validation, oracle_file_type)
   json.dump(env_results, open(os.path.join(os.path.abspath(results_folder), output_file_str), 'w'), sort_keys=True)
@@ -84,7 +90,7 @@ if __name__ == "__main__":
   parser.add_argument('--results_folder', required=True)
   parser.add_argument('--train_file_start_num', type=int)
   parser.add_argument('--validation_file_start_num', type=int)
-  parser.add_argument('--pretrained_model', type=str)
+  parser.add_argument('--pretrained_model', type=str, default=None, required=False)
   parser.add_argument('--oracle_file_type', type=str)
   args = parser.parse_args()
   #Run the benchmark and save results

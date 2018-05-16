@@ -11,7 +11,7 @@ Official repository containing OpenAI Gym environments, agents and ML models for
 
 2D Datasets: [mohakbhardwaj/motion_planning_datasets](https://github.com/mohakbhardwaj/motion_planning_datasets)
 
-Search based planning pipeline: [mohakbhardwaj/planning_python](https://github.com/mohakbhardwaj/motion_planning_datasets)
+Search based planning pipeline: [mohakbhardwaj/planning_python](https://github.com/mohakbhardwaj/planning_python)
 
 # Setting Up
 Create 
